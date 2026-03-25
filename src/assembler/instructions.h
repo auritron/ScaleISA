@@ -1,6 +1,6 @@
-#include <iostream>
+#pragma once
 
-enum Instructions {
+enum class OpCode {
 
     //memory and registers
     LOAD,
@@ -42,7 +42,7 @@ enum Instructions {
     PUSH,
     POP,
 
-    //i/o
+    //  i/o
     PRINT,
     PRINTC,
 
