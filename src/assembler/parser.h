@@ -69,7 +69,7 @@ namespace Parser {
             State cur_state;
             Action cur_action;
             std::string buffer;
-            char cur_ch;
+            unsigned char cur_ch;
             size_t ch_count;    //characters counted from input
             
         public:

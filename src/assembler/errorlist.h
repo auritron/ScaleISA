@@ -8,7 +8,7 @@ namespace Error {
         IdentifierNamingError,
         LabelNamingError,
         AddressNamingError,
-        UnknownChar,
+        UnknownCharError,
     };
 
 }
