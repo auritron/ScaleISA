@@ -19,6 +19,7 @@ Inst::Inst(Instruction::OpCode i, Reg r1, Reg r2, Reg r3 ) :
 
 Tokenizer::Tokenizer() :
     cur_state{State::Nil},
+    prev_state{State::Nil},
     cur_action{Action::Push},
     buffer{""},
     cur_ch{0},
@@ -45,20 +46,18 @@ void Tokenizer::set_state() {
 
             cur_state = State::Adt;
 
-        } else if (Parser::whitespace_chars.contains(cur_ch)) {
+        } else if (std::isspace(cur_ch)) {
 
             switch (cur_state) {
                 case State::Idn:
                 case State::Reg:
+                case State::Rgt: // despite being a transition state, this is allowed since R is alphanumeric
                 case State::Sep:
                 case State::Imm:
                 case State::Lbl:
                 case State::Adr:
                 case State::Nil:
                     cur_state = State::Nil;
-                    break;
-                case State::Rgt:
-                    raise_parsing_error(ParseErr::IdentifierNamingError);
                     break;
                 case State::Imt:
                 case State::Zer:
@@ -286,10 +285,62 @@ void Tokenizer::set_state() {
 
 }
 
+void Tokenizer::set_action() {
+
+    switch ( Parser::state_map.at(prev_state) ) {
+
+        case StateType::Word:
+        case StateType::RTransition:
+            switch ( Parser::state_map.at(cur_state) ) {
+                case StateType::Word:
+                    cur_action = Action::Push;
+                    break;
+                case StateType::Separator:
+                case StateType::None:
+                    cur_action = Action::Emit;
+                    break;
+                case StateType::Transition: // anyways handled by error
+                case StateType::RTransition:
+                    cur_action = Action::Idle;
+                    break;
+            }
+            break;
+
+        case StateType::Transition:
+            switch ( Parser::state_map.at(cur_state) ) {
+                case StateType::Word:
+                    cur_action = Action::Push;
+                    break;
+                default:
+                    cur_action = Action::Idle; // anyways handled by error
+                    break;
+            }
+            break;
+
+        case StateType::Separator:
+        case StateType::None:
+            switch ( Parser::state_map.at(cur_state) ) {
+                case StateType::Separator:
+                case StateType::None:
+                    cur_action = Action::Idle;
+                    break;
+                default:
+                    cur_action = Action::Push;
+                    break;
+            }
+            break;
+    }
+
+}
+
 void Tokenizer::tokenize() {
-    set_state();
-    set_action();
-    create_inst();
+
+    set_state(); // set state
+
+    if (cur_state != State::Err) {
+        set_action();
+        create_inst();
+    }
 
     if (cur_ch == '\n') {
         ++line_count;

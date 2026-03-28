@@ -5,7 +5,7 @@
 #include <array>
 #include <vector>
 #include <optional>
-#include <unordered_set>
+#include <unordered_map>
 
 #include "instructions.h"
 #include "errorlist.h"
@@ -29,16 +29,38 @@ namespace Parser {
         Err,    //error/unknown state
     };
 
+    enum class StateType {
+        Word,
+        RTransition, // special variation of transition since its alphanumeric
+        Transition,
+        Separator, // mostly redundant with StateType::None, helps with readability though
+        None,
+    };
+
+    static const std::unordered_map<State, StateType> state_map {
+        { State::Idn, StateType::Word },
+        { State::Reg, StateType::Word },
+        { State::Imm, StateType::Word },
+        { State::Lbl, StateType::Word },
+        { State::Adr, StateType::Word },
+        { State::Rgt, StateType::RTransition },
+        { State::Imt, StateType::Transition },
+        { State::Lbt, StateType::Transition },
+        { State::Adt, StateType::Transition },
+        { State::Zer, StateType::Transition },
+        { State::Sep, StateType::Separator },
+        { State::Cmt, StateType::None },
+        { State::Nil, StateType::None },
+        { State::Err, StateType::None },
+    };
+
     enum class Action {
         Push,   //push character to buffer
         Emit,   //emit token in buffer
-        PsEm,   //both push and emit
         Idle,   //do nothing
     };
-    
-    std::unordered_set<char> whitespace_chars { ' ', '\n', '\t', '\r' };
 
-    class Register {
+    class Register { //probably creating a single wrapper for an int here
         private:
 
             std::string_view name;
@@ -47,7 +69,6 @@ namespace Parser {
         public:
 
             Register() = delete;
-
             Register(std::string_view n, int i);
 
     };
@@ -71,6 +92,7 @@ namespace Parser {
         
         private:
             State cur_state;
+            State prev_state;
             Action cur_action;
             std::string buffer;
             unsigned char cur_ch;
