@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <optional>
+#include <unordered_set>
 
 #include "instructions.h"
 #include "errorlist.h"
@@ -21,6 +22,7 @@ namespace Parser {
         Lbt,    //label transition (when '@' is detected)
         Lbl,    //label
         Zer,    //zero prefix, transition state
+        Adt,    //address transition ('x' in '0x')
         Adr,    //address (eg. 0xDEADBEEF)
         Cmt,    //comment (;)
         Nil,    //none (whitespace type char)
@@ -33,6 +35,8 @@ namespace Parser {
         PsEm,   //both push and emit
         Idle,   //do nothing
     };
+    
+    std::unordered_set<char> whitespace_chars { ' ', '\n', '\t', '\r' };
 
     class Register {
         private:
@@ -74,7 +78,6 @@ namespace Parser {
             size_t line_count;
             size_t col_count;
             bool error_detected;
-            bool error_in_line; //check if the pointer is still in the line where the error is detected
             
         public:
 
