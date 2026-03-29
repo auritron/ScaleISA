@@ -12,12 +12,7 @@ Token::Token(Instruction::TokenType type, int val) :
 Token::Token(Instruction::TokenType type, std::string val) :
     token_type{type}, value{val} { }
 
-Inst::Inst(Instruction::OpCode i, TokenOpt t1, TokenOpt t2, TokenOpt t3 ) : //overhaul
-    instruction{i}, 
-    args{t1, t2, t3} 
-{ }
-
-UnvalInst::UnvalInst() :
+Inst::Inst() :
     token_arr{std::nullopt},
     used_size{0}
 { }

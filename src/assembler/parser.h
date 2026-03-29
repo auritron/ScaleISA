@@ -77,7 +77,7 @@ namespace Parser {
             
     };
     
-    class UnvalInst {   //unvalidated parser generated instructions
+    class Inst {   //unvalidated parser generated instructions
 
         private:
 
@@ -86,23 +86,8 @@ namespace Parser {
 
         public:
 
-            UnvalInst();
+            Inst();
             bool push_token(Token token);
-
-    };
-
-    class Inst { //overhaul
-
-        using TokenOpt = std::optional<Token>;
-
-        private:
-
-            Instruction::OpCode instruction;
-            std::array<TokenOpt, 3> args;
-
-        public:
-
-            Inst(Instruction::OpCode i, TokenOpt t1 = std::nullopt, TokenOpt t2 = std::nullopt, TokenOpt t3 = std::nullopt);
 
     };
 
@@ -113,7 +98,7 @@ namespace Parser {
             State prev_state;
             Action cur_action;
             std::string buffer;
-            UnvalInst cur_inst;
+            Inst cur_inst;
             unsigned char cur_ch;
             size_t ch_count;    //characters counted from input
             size_t line_count;
@@ -122,7 +107,7 @@ namespace Parser {
             
         public:
 
-            std::vector<UnvalInst> pipeline;
+            std::vector<Inst> pipeline;
 
             Tokenizer();
             void tokenize(); //!
@@ -130,7 +115,7 @@ namespace Parser {
             void set_state(); //:D
             void set_action(); //:D
             void execute(); //!
-            UnvalInst create_inst();
+            Inst create_inst();
             void raise_parsing_error(Error::ParsingError e); //!
 
     };
