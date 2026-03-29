@@ -401,8 +401,12 @@ void Tokenizer::execute() {
 
             cur_inst.push_token(token); //move happens here
             buffer.clear();
+            break;
 
-        }    
+        case Action::Idle: 
+            break;
+
+        }   
     
     }
 
