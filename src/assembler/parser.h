@@ -79,15 +79,19 @@ namespace Parser {
     
     class Inst {   //unvalidated parser generated instructions
 
+        public:
+
+            static constexpr int INST_SIZE = 4;
+            size_t used_size;
+
         private:
 
-            std::array<std::optional<Token>, 4> token_arr;
-            size_t used_size;
+            std::array<std::optional<Token>, INST_SIZE> token_arr;
 
         public:
 
             Inst();
-            bool push_token(Token token);
+            bool push_token(Token&& token);
 
     };
 
@@ -103,7 +107,6 @@ namespace Parser {
             size_t ch_count;    //characters counted from input
             size_t line_count;
             size_t col_count;
-            bool error_detected;
             
         public:
 
@@ -114,8 +117,7 @@ namespace Parser {
             std::optional<Instruction::OpCode> match_token();
             void set_state(); //:D
             void set_action(); //:D
-            void execute(); //!
-            Inst create_inst();
+            void execute(); //:D
             void raise_parsing_error(Error::ParsingError e); //!
 
     };

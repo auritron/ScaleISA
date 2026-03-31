@@ -17,6 +17,15 @@ Inst::Inst() :
     used_size{0}
 { }
 
+bool Inst::push_token(Token&& token) {
+    if (used_size < INST_SIZE) {
+        token_arr[used_size] = std::move(token);
+        ++used_size;
+        return true;
+    }
+    return false;
+}
+
 Tokenizer::Tokenizer() :
     cur_state{State::Nil},
     prev_state{State::Nil},
@@ -27,260 +36,252 @@ Tokenizer::Tokenizer() :
     ch_count{0},
     line_count{0},
     col_count{0},
-    error_detected{false},
     pipeline{}
 { }
 
 void Tokenizer::set_state() {
 
-    if (cur_ch == '\n') {
 
-        cur_state = State::Nil;
+    if (cur_ch == ';') {
 
-    } else if (cur_state != State::Cmt && cur_state != State::Err) {
+        cur_state = State::Cmt;
+        
+    } else if (cur_state == State::Zer && cur_ch == 'x') { //0x detection
 
-        if (cur_ch == ';') {
+        cur_state = State::Adt;
 
-            cur_state = State::Cmt;
-            
-        } else if (cur_state == State::Zer && cur_ch == 'x') { //0x detection
+    } else if (std::isspace(cur_ch)) { //simple state machine lmao
 
-            cur_state = State::Adt;
-
-        } else if (std::isspace(cur_ch)) { //simple state machine lmao
-
-            switch (cur_state) {
-                case State::Idn:
-                case State::Reg:
-                case State::Rgt: // despite being a transition state, this is allowed since R is alphanumeric
-                case State::Sep:
-                case State::Imm:
-                case State::Lbl:
-                case State::Adr:
-                case State::Nil:
-                    cur_state = State::Nil;
-                    break;
-                case State::Imt:
-                case State::Zer:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Lbt:
-                    raise_parsing_error(ParseErr::LabelNamingError);
-                    break;
-                case State::Adt:
-                    raise_parsing_error(ParseErr::AddressNamingError);
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-
-            }
-
-        } else if (cur_ch == 'R') {
-
-            switch (cur_state) {
-                case State::Nil:
-                case State::Sep:
-                    cur_state = State::Rgt;
-                    break;
-                case State::Rgt:
-                case State::Reg:
-                    cur_state = State::Idn;
-                    break;
-                case State::Adt:
-                case State::Adr:
-                    raise_parsing_error(ParseErr::AddressNamingError);
-                    break;
-                case State::Imt:
-                case State::Imm:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Zer:
-                    raise_parsing_error(ParseErr::IdentifierNamingError);
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-                default:
-                    break;
-            }
-
-        } else if (cur_ch == '@') {
-            
-            switch (cur_state) {
-                case State::Idn:
-                case State::Rgt:
-                case State::Reg:
-                case State::Zer:
-                    raise_parsing_error(ParseErr::IdentifierNamingError);
-                    break;
-                case State::Imt:
-                case State::Imm:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Lbl:
-                case State::Lbt:
-                    raise_parsing_error(ParseErr::LabelNamingError);
-                    break;
-                case State::Adt:
-                case State::Adr:
-                    raise_parsing_error(ParseErr::AddressNamingError);
-                    break;
-                case State::Sep:
-                case State::Nil:
-                    cur_state = State::Lbt;
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-            }
-
-        } else if (cur_ch == '#') {
-
-            switch (cur_state) {
-                case State::Idn:
-                case State::Rgt:
-                case State::Reg:
-                case State::Zer:
-                    raise_parsing_error(ParseErr::IdentifierNamingError);
-                    break;
-                case State::Imt:
-                case State::Imm:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Lbl:
-                case State::Lbt:
-                    raise_parsing_error(ParseErr::LabelNamingError);
-                    break;
-                case State::Adt:
-                case State::Adr:
-                    raise_parsing_error(ParseErr::AddressNamingError);
-                    break;
-                case State::Sep:
-                case State::Nil:
-                    cur_state = State::Imt;
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-            }
-
-        } else if (cur_ch == '_') {
-
-            switch (cur_state) {
-                case State::Idn:
-                case State::Rgt:
-                case State::Reg:
-                case State::Sep:
-                case State::Nil:
-                    cur_state = State::Idn;
-                    break;
-                case State::Zer:
-                    raise_parsing_error(ParseErr::IdentifierNamingError);
-                    break;
-                case State::Imt:
-                case State::Imm:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Lbl:
-                case State::Lbt:
-                    cur_state = State::Lbl;
-                    break;
-                case State::Adt:
-                case State::Adr:
-                    raise_parsing_error(ParseErr::AddressNamingError);
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-            }
-            
-        } else if (std::isdigit(cur_ch)) {
-
-            switch (cur_state) {
-                case State::Idn:
-                    cur_state = State::Idn;
-                    break;
-                case State::Rgt:
-                case State::Reg:
-                    cur_state = State::Reg;
-                    break;
-                case State::Sep:
-                case State::Nil:
-                    if (cur_ch == '0') { //if its zero, set to zer to transition to address, else raise error
-                        cur_state = State::Zer;
-                    } else {
-                        raise_parsing_error(ParseErr::IdentifierNamingError);
-                    }
-                    break;
-                case State::Imt:
-                case State::Imm:
-                    cur_state = State::Imm;
-                    break;
-                case State::Lbt:
-                case State::Lbl:
-                    cur_state = State::Lbl;
-                    break;
-                case State::Zer:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Adt:
-                case State::Adr:
-                    cur_state = State::Adr;
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-            }
-
-        } else if (std::isalpha(cur_ch)) {
-
-            switch (cur_state) {
-                case State::Idn:
-                case State::Rgt:
-                case State::Reg:
-                case State::Sep:
-                case State::Nil:
-                    cur_state = State::Idn;
-                    break;
-                case State::Imm:
-                case State::Imt:
-                    raise_parsing_error(ParseErr::ImmediateValueError);
-                    break;
-                case State::Lbt:
-                case State::Lbl:
-                    cur_state = State::Lbl;
-                    break;
-                case State::Zer:
-                    raise_parsing_error(ParseErr::IdentifierNamingError);
-                    break;
-                case State::Adt:
-                case State::Adr:
-                    if ((cur_ch >= 'A' && cur_ch <= 'F') || (cur_ch >= 'a' && cur_ch <= 'f')) { //if between A-F or a-f
-                        cur_state = State::Adr;
-                    } else {
-                        raise_parsing_error(ParseErr::AddressNamingError);
-                    }
-                    break;
-                case State::Err:
-                    break;
-                case State::Cmt:
-                    std::abort();
-                
-            }
-
-        } else {
-
-            cur_state = State::Err;
-            raise_parsing_error(ParseErr::UnknownCharError);
+        switch (cur_state) {
+            case State::Idn:
+            case State::Reg:
+            case State::Rgt: // despite being a transition state, this is allowed since R is alphanumeric
+            case State::Sep:
+            case State::Imm:
+            case State::Lbl:
+            case State::Adr:
+            case State::Nil:
+                cur_state = State::Nil;
+                break;
+            case State::Imt:
+            case State::Zer:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Lbt:
+                raise_parsing_error(ParseErr::LabelNamingError);
+                break;
+            case State::Adt:
+                raise_parsing_error(ParseErr::AddressNamingError);
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
 
         }
+
+    } else if (cur_ch == 'R') {
+
+        switch (cur_state) {
+            case State::Nil:
+            case State::Sep:
+                cur_state = State::Rgt;
+                break;
+            case State::Rgt:
+            case State::Reg:
+                cur_state = State::Idn;
+                break;
+            case State::Adt:
+            case State::Adr:
+                raise_parsing_error(ParseErr::AddressNamingError);
+                break;
+            case State::Imt:
+            case State::Imm:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Zer:
+                raise_parsing_error(ParseErr::IdentifierNamingError);
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
+            default:
+                break;
+        }
+
+    } else if (cur_ch == '@') {
+        
+        switch (cur_state) {
+            case State::Idn:
+            case State::Rgt:
+            case State::Reg:
+            case State::Zer:
+                raise_parsing_error(ParseErr::IdentifierNamingError);
+                break;
+            case State::Imt:
+            case State::Imm:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Lbl:
+            case State::Lbt:
+                raise_parsing_error(ParseErr::LabelNamingError);
+                break;
+            case State::Adt:
+            case State::Adr:
+                raise_parsing_error(ParseErr::AddressNamingError);
+                break;
+            case State::Sep:
+            case State::Nil:
+                cur_state = State::Lbt;
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
+        }
+
+    } else if (cur_ch == '#') {
+
+        switch (cur_state) {
+            case State::Idn:
+            case State::Rgt:
+            case State::Reg:
+            case State::Zer:
+                raise_parsing_error(ParseErr::IdentifierNamingError);
+                break;
+            case State::Imt:
+            case State::Imm:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Lbl:
+            case State::Lbt:
+                raise_parsing_error(ParseErr::LabelNamingError);
+                break;
+            case State::Adt:
+            case State::Adr:
+                raise_parsing_error(ParseErr::AddressNamingError);
+                break;
+            case State::Sep:
+            case State::Nil:
+                cur_state = State::Imt;
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
+        }
+
+    } else if (cur_ch == '_') {
+
+        switch (cur_state) {
+            case State::Idn:
+            case State::Rgt:
+            case State::Reg:
+            case State::Sep:
+            case State::Nil:
+                cur_state = State::Idn;
+                break;
+            case State::Zer:
+                raise_parsing_error(ParseErr::IdentifierNamingError);
+                break;
+            case State::Imt:
+            case State::Imm:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Lbl:
+            case State::Lbt:
+                cur_state = State::Lbl;
+                break;
+            case State::Adt:
+            case State::Adr:
+                raise_parsing_error(ParseErr::AddressNamingError);
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
+        }
+        
+    } else if (std::isdigit(cur_ch)) {
+
+        switch (cur_state) {
+            case State::Idn:
+                cur_state = State::Idn;
+                break;
+            case State::Rgt:
+            case State::Reg:
+                cur_state = State::Reg;
+                break;
+            case State::Sep:
+            case State::Nil:
+                if (cur_ch == '0') { //if its zero, set to zer to transition to address, else raise error
+                    cur_state = State::Zer;
+                } else {
+                    raise_parsing_error(ParseErr::IdentifierNamingError);
+                }
+                break;
+            case State::Imt:
+            case State::Imm:
+                cur_state = State::Imm;
+                break;
+            case State::Lbt:
+            case State::Lbl:
+                cur_state = State::Lbl;
+                break;
+            case State::Zer:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Adt:
+            case State::Adr:
+                cur_state = State::Adr;
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
+        }
+
+    } else if (std::isalpha(cur_ch)) {
+
+        switch (cur_state) {
+            case State::Idn:
+            case State::Rgt:
+            case State::Reg:
+            case State::Sep:
+            case State::Nil:
+                cur_state = State::Idn;
+                break;
+            case State::Imm:
+            case State::Imt:
+                raise_parsing_error(ParseErr::ImmediateValueError);
+                break;
+            case State::Lbt:
+            case State::Lbl:
+                cur_state = State::Lbl;
+                break;
+            case State::Zer:
+                raise_parsing_error(ParseErr::IdentifierNamingError);
+                break;
+            case State::Adt:
+            case State::Adr:
+                if ((cur_ch >= 'A' && cur_ch <= 'F') || (cur_ch >= 'a' && cur_ch <= 'f')) { //if between A-F or a-f
+                    cur_state = State::Adr;
+                } else {
+                    raise_parsing_error(ParseErr::AddressNamingError);
+                }
+                break;
+            case State::Err:
+                break;
+            case State::Cmt:
+                std::abort();
+            
+        }
+
+    } else {
+
+        cur_state = State::Err;
+        raise_parsing_error(ParseErr::UnknownCharError);
 
     }
 
@@ -335,95 +336,103 @@ void Tokenizer::set_action() {
 }
 
 void Tokenizer::execute() {
-    
-    if (!error_detected) {
         
-        Token token;
-        switch (cur_action) {
+    Token token;
+    switch (cur_action) {
 
-        case Action::Push:
-            buffer.push_back(cur_ch);
-            break;
-        
-        case Action::Emit:
-            
-            
-            switch (prev_state) {
-                case State::Idn:
-                    try {
-                        token = Token(Instruction::TokenType::OpCode, Instruction::instruction_map.at(buffer)); //tt
-                    } catch (const std::out_of_range& e) {
-                        token = Token(Instruction::TokenType::Variable, buffer); //sv
-                    }
-                    break;
-                case State::Reg:
-                case State::Imm:
-                    try {
-                        size_t pos;
-                        int val = std::stoi(buffer.substr(1), &pos);
-                        if (pos != (buffer.size() - 1)) throw std::invalid_argument("Not completely int!");
-                        switch (prev_state) {
-                            case State::Reg: token = Token(Instruction::TokenType::Register, val); break; //account for error handling
-                            case State::Imm: token = Token(Instruction::TokenType::Immediate, val); break;
-                        }
-                    } catch (const std::invalid_argument& e) { //shouldnt happen ideally
-                        token = Token(Instruction::TokenType::Invalid, 0);
-                    } catch (const std::out_of_range& e) {
-                        switch (prev_state) {
-                            case State::Reg: raise_parsing_error(ParseErr::RegisterOutOfRange); break;
-                            case State::Imm: raise_parsing_error(ParseErr::ImmediateValueTooBig); break;
-                        }
-                    }
-                    break;
-                case State::Adr:
-                    try {
-                        size_t pos;
-                        int val = std::stoi(buffer.substr(2), &pos, 16); //hex code
-                        if (pos != (buffer.size() - 2)) throw std::invalid_argument("Not completely hex!");
-                        token = Token(Instruction::TokenType::Address, val); //account for error handling
-                    } catch (const std::invalid_argument& e) { //shouldnt happen ideally
-                        token = Token(Instruction::TokenType::Invalid, 0);
-                    } catch (const std::out_of_range& e) {
-                        raise_parsing_error(ParseErr::AddressOutOfRange);
-                    }
-                    break;
-                case State::Lbl:
-                    token = Token(Instruction::TokenType::Label, buffer.substr(1));
-                    break;
-                default:
-                    std::abort();
-            }
-
-            cur_inst.push_token(token); //move happens here
-            buffer.clear();
-            break;
-
-        case Action::Idle: 
-            break;
-
-        }   
+    case Action::Push:
+        buffer.push_back(cur_ch);
+        break;
     
+    case Action::Emit:
+        
+        
+        switch (prev_state) {
+            case State::Idn:
+                try {
+                    token = Token(Instruction::TokenType::OpCode, Instruction::instruction_map.at(buffer)); //tt
+                } catch (const std::out_of_range& e) {
+                    token = Token(Instruction::TokenType::Variable, buffer); //sv
+                }
+                break;
+            case State::Reg:
+            case State::Imm:
+                try {
+                    size_t pos;
+                    int val = std::stoi(buffer.substr(1), &pos);
+                    if (pos != (buffer.size() - 1)) throw std::invalid_argument("Not completely int!");
+                    switch (prev_state) {
+                        case State::Reg: token = Token(Instruction::TokenType::Register, val); break; //account for error handling
+                        case State::Imm: token = Token(Instruction::TokenType::Immediate, val); break;
+                    }
+                } catch (const std::invalid_argument& e) { //shouldnt happen ideally
+                    token = Token(Instruction::TokenType::Invalid, 0);
+                } catch (const std::out_of_range& e) {
+                    switch (prev_state) {
+                        case State::Reg: raise_parsing_error(ParseErr::RegisterOutOfRange); break;
+                        case State::Imm: raise_parsing_error(ParseErr::ImmediateValueTooBig); break;
+                    }
+                }
+                break;
+            case State::Adr:
+                try {
+                    size_t pos;
+                    int val = std::stoi(buffer.substr(2), &pos, 16); //hex code
+                    if (pos != (buffer.size() - 2)) throw std::invalid_argument("Not completely hex!");
+                    token = Token(Instruction::TokenType::Address, val); //account for error handling
+                } catch (const std::invalid_argument& e) { //shouldnt happen ideally
+                    token = Token(Instruction::TokenType::Invalid, 0);
+                } catch (const std::out_of_range& e) {
+                    raise_parsing_error(ParseErr::AddressOutOfRange);
+                }
+                break;
+            case State::Lbl:
+                token = Token(Instruction::TokenType::Label, buffer.substr(1));
+                break;
+            default:
+                std::abort();
+        }
+
+        
+        if (!cur_inst.push_token(std::move(token))) raise_parsing_error(ParseErr::InstructionTooLong); //move happens here 
+        buffer.clear();
+        break;
+
+    case Action::Idle: 
+        break;
+
     }
 
 }
 
 void Tokenizer::tokenize() {
 
-    set_state(); // set state
-
-    if (cur_state != State::Err) {
-        set_action();
-        create_inst();
+    try {
+        if (cur_state != State::Err && cur_state != State::Cmt) {
+            set_state(); // set state
+            set_action(); 
+            execute();
+        }
+    } catch (const ParseErr& e) {
+        cur_state = State::Err;
+        //error_log.log(e, line_count, column_count); //add later
     }
 
     if (cur_ch == '\n') {
+        if (cur_state != State::Err && cur_inst.used_size != 0) {
+            pipeline.push_back(std::move(cur_inst));
+            cur_inst = Inst();
+        }
         ++line_count;
         col_count = 0;
+        cur_state = State::Nil;
     } else {
         ++col_count;
     }
+
+    prev_state = cur_state;
 }
 
 void Tokenizer::raise_parsing_error(ParseErr e) {
-
+    throw e;
 }
