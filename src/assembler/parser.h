@@ -60,10 +60,10 @@ namespace parser_mod {
         public:
 
             Parser();
-            void tokenize(assembler_mod::Assembler::Pipeline& pipeline); //!
+            void tokenize(std::vector<instruction_mod::Inst>& pipeline); //!
             void set_state(); //:D
             void set_action(); //:D
-            void execute(assembler_mod::Assembler::Pipeline& pipeline); //:D
+            void execute(std::vector<instruction_mod::Inst>& pipeline); //:D
             void raise_parsing_error(Error::ParsingError e); //!
 
     };

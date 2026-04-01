@@ -1,6 +1,4 @@
-#include "assembler.h"
 #include "parser.h"
-#include "errorlist.h"
 
 using namespace parser_mod;
 
@@ -340,7 +338,7 @@ void Parser::set_action() {
 
 }
 
-void Parser::execute(assembler_mod::Assembler::Pipeline& pipeline) {
+void Parser::execute(std::vector<instruction_mod::Inst>& pipeline) {
         
     instruction_mod::Token token;
     switch (cur_action) {
@@ -410,7 +408,7 @@ void Parser::execute(assembler_mod::Assembler::Pipeline& pipeline) {
 
 }
 
-void Parser::tokenize(assembler_mod::Assembler::Pipeline& pipeline) {
+void Parser::tokenize(std::vector<instruction_mod::Inst>& pipeline) {
 
     try {
         if (cur_state != State::Err && cur_state != State::Cmt) {
