@@ -29,7 +29,6 @@ namespace instruction_mod {
         SEND,
         COPY,
         SET,
-        SWAP,
 
         //  bitwise
         NOT,

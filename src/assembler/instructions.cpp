@@ -8,7 +8,6 @@ namespace instruction_mod {
         { "SEND",   OpCode::SEND },
         { "COPY",   OpCode::COPY },
         { "SET",    OpCode::SET },
-        { "SWAP",   OpCode::SWAP },
         { "NOT",    OpCode::NOT },
         { "AND",    OpCode::AND },
         { "OR",     OpCode::OR },

@@ -8,9 +8,9 @@
 
 namespace analyzer_mod {
 
-    using ValidationMap = std::unordered_map<instruction_mod::OpCode, 
+    using InstructionFmt = std::unordered_map<instruction_mod::OpCode, 
         std::array<std::optional<instruction_mod::TokenOpt>, instruction_mod::Inst::INST_SIZE - 1>>; //size is 3 by default
-    extern const ValidationMap validation_map;
+    extern const InstructionFmt instruction_fmt;
 
     class Analyzer {
 
