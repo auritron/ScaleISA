@@ -21,6 +21,11 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
         << ", Cm: " << parser.col_count << std::endl;*/
     }
     parser.tokenize(pipeline, '\n'); //add \n sentinel
+
+    auto analyzer = analyzer_mod::Analyzer(false);
+    for (int inst_no{0}; inst_no < pipeline.size(); inst_no++) {
+        analyzer.analyze(pipeline[inst_no]);
+    }
 }
 
 void Assembler::dbg_display_parse_tokens(const instruction_mod::Pipeline& pipeline) const {

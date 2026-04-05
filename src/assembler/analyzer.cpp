@@ -79,4 +79,31 @@ namespace analyzer_mod {
 
     };
 
+    Analyzer::Analyzer(bool err_detected) :
+        error_detected{err_detected}
+    { }
+
+    void Analyzer::validate_opcode(const instruction_mod::Inst& inst) const {
+        
+    }
+
+    void Analyzer::analyze(const instruction_mod::Inst& inst) {
+        const auto& first_token = inst.token_arr[0];
+        if (!first_token.has_value()) { //check if first token exists, should not happen ideally but still
+            raise_semantic_error(Error::SemanticError::MissingOpCodeError);
+        } else {
+            switch(first_token->token_type) {
+                case TT::OpCode:
+                    //opcode matching and validation
+                    break;
+                case TT::Label:
+                    //label validation
+                    break;
+                default:
+                    raise_semantic_error(Error::SemanticError::IncorrectFirstToken);
+                    break;
+            }
+        }
+    };
+
 }

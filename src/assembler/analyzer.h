@@ -16,11 +16,15 @@ namespace analyzer_mod {
 
     class Analyzer {
 
+        private:
+            bool error_detected;
+
         public:
 
-            void analyze(const instruction_mod::Pipeline& pipeline) const;
-            void match_opcode(const instruction_mod::Pipeline& pipeline);
-            void raise_semantic_error(Error::SemanticError e);
+            Analyzer(bool err_detected);
+            void validate_opcode(const instruction_mod::Inst& inst) const;
+            void analyze(const instruction_mod::Inst& inst);
+            void raise_semantic_error(Error::SemanticError e); 
 
     };
 

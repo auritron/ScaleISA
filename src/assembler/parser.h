@@ -61,7 +61,7 @@ namespace parser_mod {
         public:
             
             Parser();
-            void tokenize(instruction_mod::Pipeline& pipeline, char cur_char); //!
+            void tokenize(instruction_mod::Pipeline& pipeline, char cur_char); //:D
             void set_state(); //:D
             void set_action(); //:D
             void execute(instruction_mod::Pipeline& pipeline); //:D
