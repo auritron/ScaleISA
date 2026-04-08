@@ -1,7 +1,7 @@
 #include <iostream>
 #include <magic_enum/magic_enum.hpp>
 
-#include "assembler.h"
+#include "assembler.hpp"
 #include "../overload.hpp"
 
 using namespace assembler_mod;

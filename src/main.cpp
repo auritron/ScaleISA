@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 
-#include "assembler/assembler.h"
+#include "assembler/assembler.hpp"
 
 namespace fs = std::filesystem;
 

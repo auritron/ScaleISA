@@ -1,4 +1,4 @@
-#include "analyzer.h"
+#include "analyzer.hpp"
 #include "../overload.hpp"
 
 using instruction_mod::OpCode;
