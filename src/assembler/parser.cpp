@@ -404,7 +404,7 @@ namespace parser_mod {
 
     }
 
-    void Parser::tokenize(instruction_mod::Pipeline& pipeline, char current_char, std::vector<error::Error>& error_log) {
+    void Parser::parse(instruction_mod::Pipeline& pipeline, char current_char, std::vector<error::Error>& error_log) {
 
         cur_ch = current_char;
 
@@ -416,6 +416,7 @@ namespace parser_mod {
             if (!result) {
                 cur_state = State::Err;
                 buffer.clear();
+                if (!error_detected) error_detected = true;
                 //error_log.log(e, line_count, column_count); //add later
             }
         }

@@ -15,13 +15,13 @@ Assembler::Assembler() :
 void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::string& file) {
     auto parser = parser_mod::Parser();
     for (int pos{0}; pos < file.size(); pos++) {
-        parser.tokenize(pipeline, file[pos], error_log);
+        parser.parse(pipeline, file[pos], error_log);
         //debugging purpose only
         /*std::cout << magic_enum::enum_name(parser.cur_state) 
         << ", Ln: " << parser.line_count 
         << ", Cm: " << parser.col_count << std::endl;*/
     }
-    parser.tokenize(pipeline, '\n', error_log); //add \n sentinel
+    parser.parse(pipeline, '\n', error_log); //add \n sentinel
 
     if (!pipeline.empty()) {
         auto analyzer = analyzer_mod::Analyzer(false);
