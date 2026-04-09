@@ -6,7 +6,7 @@ using namespace error;
 std::string_view Error::fmt_error_as_str() {
 
     return std::visit(overload{
-        [this](ParsingError PErr){
+        [](ParsingError PErr){
             switch (PErr) {
                 case ParsingError::ImmediateValueError:
                     return "Operand is not a correct immediate value";
@@ -30,7 +30,7 @@ std::string_view Error::fmt_error_as_str() {
                     return "Error message for this type has not been implemented";
             }
         },
-        [this](SemanticError SErr){
+        [](SemanticError SErr){
             switch(SErr) {
                 case SemanticError::MissingOpCodeError:
                     return "Missing OpCode in Instruction";
@@ -38,6 +38,14 @@ std::string_view Error::fmt_error_as_str() {
                     return "Instruction must either start with an OpCode or a Label";
                 case SemanticError::IncorrectOperandFmt:
                     return "Operands not in the correct format as the given instructions";
+                case SemanticError::InvalidOpCodePosition:
+                    return "Opcode position is invalid";
+                case SemanticError::RegisterOutOfRange:
+                    return "Requested register number is out of range";
+                case SemanticError::ImmediateOutOfRange:
+                    return "Immediate value in instruction is out of range";
+                case SemanticError::AddressOutOfRange:
+                    return "Memory address in instruction is out of range";
                 case SemanticError::UnknownSemanticError:
                     return "Unknown semantic error";
                 default:

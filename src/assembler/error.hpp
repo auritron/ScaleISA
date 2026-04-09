@@ -24,6 +24,10 @@ namespace error {
         IncorrectFirstToken,
         IncorrectOperandFmt,
         UnknownSemanticError,
+        InvalidOpCodePosition,
+        RegisterOutOfRange,
+        ImmediateOutOfRange,
+        AddressOutOfRange,
     };
 
     template <typename T>

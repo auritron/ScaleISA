@@ -84,8 +84,49 @@ namespace analyzer_mod {
         error_detected{err_detected}
     { }
 
-    std::expected<void, SemErr> Analyzer::validate_token(const instruction_mod::Token& inst) const {
-        
+    std::expected<void, SemErr> Analyzer::validate_token(const instruction_mod::Token& token) const { //only checked for positions 2 to INSTSIZE
+        return std::visit(overload{
+            [&token](OpCode) -> std::expected<void, SemErr> { //shouldn't happen ideally
+                return std::unexpected(SemErr::InvalidOpCodePosition);
+            },
+            [&token](int tkn_i) -> std::expected<void, SemErr> { 
+                switch (token.token_type) {
+                    case TT::Register:
+                        if (tkn_i < 0 || tkn_i >= instruction_mod::Inst::MAX_REG_COUNT) {
+                            return std::unexpected(SemErr::RegisterOutOfRange);
+                        } else {
+                            return {};
+                        }
+                    case TT::Immediate:
+                        if (tkn_i < 0 || tkn_i >= instruction_mod::Inst::MAX_IMM_VAL) {
+                            return std::unexpected(SemErr::ImmediateOutOfRange);
+                        } else {
+                            return {};
+                        }
+                    case TT::Address:
+                        if (tkn_i < 0 || tkn_i >= instruction_mod::Inst::MAX_ADDR_VAL) {
+                            return std::unexpected(SemErr::AddressOutOfRange);
+                        } else {
+                            return {};
+                        }
+                    default:
+                        std::abort(); //unreachable
+                        return std::unexpected(SemErr::UnknownSemanticError);
+                }
+            },
+            [&token](std::string) -> std::expected<void, SemErr> { 
+                switch (token.token_type) {
+                    case TT::Label:
+                        //label verification, need to complete
+                        return {};
+                    case TT::Variable:
+                        return {}; //no further verification required
+                    default:
+                        std::abort(); //unreachable
+                        return std::unexpected(SemErr::UnknownSemanticError);
+                }    
+            },
+        }, token.value);
     }
 
     std::expected<void, SemErr> Analyzer::validate_opcode(const instruction_mod::Inst& inst, instruction_mod::OpCode opcode) const {

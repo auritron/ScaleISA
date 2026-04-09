@@ -9,11 +9,12 @@
 #include <optional>
 #include <variant>
 #include <initializer_list>
+#include <cstdint>
 
 namespace instruction_mod {
 
     enum class TokenType {
-        Invalid, //debugging purposes
+        Invalid, //debugging purposes, should not ideally be pushed
         OpCode,
         Variable,
         Register,
@@ -113,7 +114,10 @@ namespace instruction_mod {
 
         public:
 
-            static constexpr int INST_SIZE = 4;
+            static constexpr size_t INST_SIZE = 4;
+            static constexpr size_t MAX_REG_COUNT = 16;
+            static constexpr int MAX_ADDR_VAL = 65535;
+            static constexpr int MAX_IMM_VAL = 65535;
             size_t used_size;
             std::array<std::optional<Token>, INST_SIZE> token_arr;
 
