@@ -3,7 +3,7 @@
 
 using instruction_mod::OpCode;
 using TT = instruction_mod::TokenType;
-using SemErr = error::Error::SemanticError;
+using SemErr = error::SemanticError;
 
 namespace analyzer_mod {
 

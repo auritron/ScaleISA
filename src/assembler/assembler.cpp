@@ -15,13 +15,14 @@ Assembler::Assembler() :
 void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::string& file) {
     auto parser = parser_mod::Parser();
     for (int pos{0}; pos < file.size(); pos++) {
-        parser.parse(pipeline, file[pos], error_log);
+        auto parse_err = parser.parse(pipeline, file[pos]);
+        if (!parse_err) log_error(parse_err.error());
         //debugging purpose only
         /*std::cout << magic_enum::enum_name(parser.cur_state) 
         << ", Ln: " << parser.line_count 
         << ", Cm: " << parser.col_count << std::endl;*/
     }
-    parser.parse(pipeline, '\n', error_log); //add \n sentinel
+    { auto parse_err = parser.parse(pipeline, '\n'); if (!parse_err) log_error(parse_err.error()); } //add \n sentinel
 
     if (!pipeline.empty()) {
         auto analyzer = analyzer_mod::Analyzer(false);
@@ -54,6 +55,6 @@ void Assembler::dbg_display_parse_tokens(const instruction_mod::Pipeline& pipeli
 
 }
 
-void log_error(std::vector<error::Error>& error_log, error::Error error) {
-    error_log.push_back(error);
+void Assembler::log_error(error::Err auto error) {
+    error_log.emplace_back(error);
 }

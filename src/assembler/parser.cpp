@@ -2,8 +2,6 @@
 
 namespace parser_mod {
 
-    using ParseErr = error::Error::ParsingError;
-
     const std::unordered_map<State, StateType> state_map {
         { State::Idn, StateType::Word },
         { State::Reg, StateType::Word },
@@ -404,7 +402,7 @@ namespace parser_mod {
 
     }
 
-    void Parser::parse(instruction_mod::Pipeline& pipeline, char current_char, std::vector<error::Error>& error_log) {
+    std::expected<void, ParseErr> Parser::parse(instruction_mod::Pipeline& pipeline, char current_char) {
 
         cur_ch = current_char;
 
@@ -417,7 +415,7 @@ namespace parser_mod {
                 cur_state = State::Err;
                 buffer.clear();
                 if (!error_detected) error_detected = true;
-                //error_log.log(e, line_count, column_count); //add later
+                return std::unexpected<ParseErr>(result.error());
             }
         }
 
@@ -434,6 +432,8 @@ namespace parser_mod {
         }
 
         prev_state = cur_state;
+
+        return {};
     }
 
 }

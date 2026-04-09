@@ -12,6 +12,8 @@
 
 namespace parser_mod { 
 
+    using ParseErr = error::ParsingError;
+
     enum class State {
         Idn,    //identifier mode, transition state, can be pushed as variable or opcode
         Rgt,    //register transition state (when 'R' is detected)
@@ -62,10 +64,10 @@ namespace parser_mod {
         public:
             
             Parser();
-            void parse(instruction_mod::Pipeline& pipeline, char cur_char, std::vector<error::Error>& error_log); //:D
-            std::expected<void, error::Error::ParsingError> set_state(); //:D
-            std::expected<void, error::Error::ParsingError> set_action(); //:D
-            std::expected<void, error::Error::ParsingError> execute(instruction_mod::Pipeline& pipeline); //:D
+            std::expected<void, ParseErr> parse(instruction_mod::Pipeline& pipeline, char cur_char); //:D
+            std::expected<void, ParseErr> set_state(); //:D
+            std::expected<void, ParseErr> set_action(); //:D
+            std::expected<void, ParseErr> execute(instruction_mod::Pipeline& pipeline); //:D
 
     };
 
