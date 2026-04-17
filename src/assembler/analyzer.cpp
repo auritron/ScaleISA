@@ -93,7 +93,7 @@ namespace analyzer_mod {
                 case TT::Label:
                     return std::visit(overload{
                         [this](std::string val) -> std::expected<void, SemErr> {
-                            auto [_, result] = label_table.insert(std::move(val));
+                            auto [_, result] = label_table.insert(val);
                             if (!result) {
                                 return std::unexpected(SemErr::LabelAlreadyExists);
                             }
@@ -120,19 +120,19 @@ namespace analyzer_mod {
             [&token](int tkn_i) -> std::expected<void, SemErr> { 
                 switch (token.token_type) {
                     case TT::Register:
-                        if (tkn_i < 0 || tkn_i >= instruction_mod::Inst::MAX_REG_COUNT) {
+                        if (tkn_i < 0 || tkn_i > instruction_mod::Inst::MAX_REG_COUNT) {
                             return std::unexpected(SemErr::RegisterOutOfRange);
                         } else {
                             return {};
                         }
                     case TT::Immediate:
-                        if (tkn_i < 0 || tkn_i >= instruction_mod::Inst::MAX_IMM_VAL) { //add limit of 15 for shifting
+                        if (tkn_i < 0 || tkn_i > instruction_mod::Inst::MAX_IMM_VAL) { //add limit of 15 for shifting
                             return std::unexpected(SemErr::ImmediateOutOfRange);
                         } else {
                             return {};
                         }
                     case TT::Address:
-                        if (tkn_i < 0 || tkn_i >= instruction_mod::Inst::MAX_ADDR_VAL) {
+                        if (tkn_i < 0 || tkn_i > instruction_mod::Inst::MAX_ADDR_VAL) {
                             return std::unexpected(SemErr::AddressOutOfRange);
                         } else {
                             return {};
@@ -142,11 +142,13 @@ namespace analyzer_mod {
                         return std::unexpected(SemErr::UnknownSemanticError);
                 }
             },
-            [&token](std::string) -> std::expected<void, SemErr> { 
+            [this, &token](std::string tkn_s) -> std::expected<void, SemErr> { 
                 switch (token.token_type) {
                     case TT::Label:
-                        //label verification, need to complete
-                        return {};
+                        if (label_table.contains(tkn_s)) {
+                            return {};
+                        }
+                        return std::unexpected(SemErr::UndefinedLabelError);
                     case TT::Variable:
                         return {}; //no further verification required
                     default:
@@ -170,9 +172,13 @@ namespace analyzer_mod {
 
                 if (cur_token.has_value() != cur_target.has_value()) {
                     return std::unexpected(SemErr::IncorrectOperandFmt);
-                }
-                if (cur_token.has_value() && !cur_target->token_type_exists(cur_token->token_type)) {
-                    return std::unexpected(SemErr::IncorrectOperandFmt);
+                } else if (cur_token.has_value()) {
+                    if (!cur_target->token_type_exists(cur_token->token_type)) {
+                        return std::unexpected(SemErr::IncorrectOperandFmt);
+                    } else {
+                        const auto& tkn_val_res = validate_token(cur_token.value());
+                        if (!tkn_val_res) return tkn_val_res;
+                    }
                 }
 
             }
@@ -201,8 +207,7 @@ namespace analyzer_mod {
                     //remaining validation
                     break;
                 }
-                case TT::Label:
-                    //label validation
+                case TT::Label: //intentionally empty, covered in scout
                     break;
                 default:
                     return std::unexpected(SemErr::IncorrectFirstToken);

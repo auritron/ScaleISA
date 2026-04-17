@@ -29,6 +29,7 @@ namespace error {
         ImmediateOutOfRange,
         AddressOutOfRange,
         LabelAlreadyExists,
+        UndefinedLabelError,
     };
 
     template <typename T>
