@@ -1,6 +1,3 @@
-#include <iostream>
-#include <magic_enum/magic_enum.hpp>
-
 #include "assembler.hpp"
 #include "../overload.hpp"
 
@@ -32,7 +29,13 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
         auto analyzer = analyzer_mod::Analyzer();
         for (int inst_no{0}; inst_no < pipeline.size(); ++inst_no) {
             auto analyze_success = analyzer.analyze(pipeline[inst_no]);
-            if (!analyze_success) { if (!error_detected) error_detected = true; log_error(analyze_success.error()); };
+            if (!analyze_success) { 
+                if (!error_detected) error_detected = true; 
+                log_error(analyze_success.error()); 
+                std::cout << "INVALID\n";
+            } else {
+                std::cout << "VALID\n";
+            };
         }
     }
 

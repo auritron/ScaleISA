@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+#include <magic_enum/magic_enum.hpp>
 
 #include "instructions.hpp"
 #include "error.hpp"
