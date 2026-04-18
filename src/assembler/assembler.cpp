@@ -23,7 +23,8 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
         if (!parse_success) {
             if (!error_detected) error_detected = true; 
             log_error(parse_success.error()); 
-    }} 
+        }
+    } 
 
     if (!pipeline.empty()) {
         auto analyzer = analyzer_mod::Analyzer();
