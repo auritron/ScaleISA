@@ -47,6 +47,12 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
         }
     }
 
+    if (!error_detected) { //only do codegen if no errors are detected
+        std::string filename = std::string(assembler_mod::prog_name) + ".bin";
+        std::ofstream output(filename, std::ios::binary);
+        //generate code
+    }
+
 }
 
 void Assembler::dbg_display_tokens(const instruction_mod::Pipeline& pipeline) const {
@@ -77,7 +83,7 @@ void Assembler::dbg_display_labels() const {
     for (const auto& [key, value] : label_table) {
         std::cout << key << ": " << value << "\n";
     }
-    
+
 }
 
 void Assembler::log_error(error::Err auto error) {

@@ -12,7 +12,8 @@ namespace fs = std::filesystem;
 int main(int argc, char* argv[]) {
 
     fs::path source_dir = fs::path(__FILE__).parent_path();
-    fs::path filepath = source_dir.parent_path() / "progs" / "demo.skasm";
+    std::string filename = std::string(assembler_mod::prog_name) + ".skasm";
+    fs::path filepath = source_dir.parent_path() / "progs" / filename;
 
     std::ifstream asm_prog(filepath);
     

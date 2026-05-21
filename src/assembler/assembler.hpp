@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <fstream>
 #include <magic_enum/magic_enum.hpp> //debugging
 
 #include "instructions.hpp"
@@ -12,6 +13,8 @@
 #include "codegen.hpp"
 
 namespace assembler_mod {
+    
+    inline constexpr std::string_view prog_name = "demo";
 
     class Assembler {
 
