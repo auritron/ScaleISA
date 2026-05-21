@@ -81,7 +81,8 @@ namespace analyzer_mod {
     { }
 
     //scouting labels as first pass
-    std::expected<void, SemErr> Analyzer::scout_lbl(instruction_mod::Inst& inst, std::unordered_map<std::string, size_t>& label_table) const {
+    std::expected<void, SemErr> Analyzer::scout_lbl(instruction_mod::Inst& inst, std::unordered_map<std::string, size_t>& label_table) { 
+        //std::cout << priv_inst_count << "\n";       
         auto& first_token{inst.token_arr[0]};
         bool label_too_long {false};
         if (inst.used_size > 1) label_too_long = true;
@@ -89,6 +90,9 @@ namespace analyzer_mod {
             return std::unexpected(SemErr::MissingOpCodeError);
         } else {
             switch (first_token->token_type) {
+                case TT::OpCode:
+                    inst.inst_no = priv_inst_count++;
+                    break;
                 case TT::Label:
                     if (label_too_long) {
                         return std::unexpected(SemErr::LabelTooLongError); //if extra operands apart from just the label
@@ -108,6 +112,7 @@ namespace analyzer_mod {
                             }
                         }, first_token->value);
                     }
+                    break;
                     //add label to symbol table
                 default: //ignore otherwise (for now)
                     return {};
@@ -200,14 +205,13 @@ namespace analyzer_mod {
     }
 
     //analyzer
-    std::expected<void, SemErr> Analyzer::analyze(instruction_mod::Inst& inst, const std::unordered_map<std::string, size_t>& label_table) {
+    std::expected<void, SemErr> Analyzer::analyze(instruction_mod::Inst& inst, const std::unordered_map<std::string, size_t>& label_table) const {
         const auto& first_token = inst.token_arr[0];
         if (!first_token.has_value()) { //check if first token exists, should not happen ideally but still
             return std::unexpected(SemErr::MissingOpCodeError);
         } else {
             switch(first_token->token_type) {
                 case TT::OpCode: {
-                    inst.inst_no = priv_inst_count++;
                     auto is_matched = std::visit(overload{
                         [this, &inst, &label_table](instruction_mod::OpCode oc) -> std::expected<void, SemErr> {
                             return validate_opcode(inst, oc, label_table);

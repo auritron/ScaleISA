@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
         
         assembler.assemble_prog(inst_pipeline, buffer.str());
         assembler.dbg_display_tokens(inst_pipeline);
+        assembler.dbg_display_labels();
         
     } else {
         std::cout << "Error: File not found!" << std::endl;

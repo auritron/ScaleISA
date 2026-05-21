@@ -28,10 +28,10 @@ namespace analyzer_mod {
         public:
 
             Analyzer();
-            std::expected<void, SemErr> scout_lbl(instruction_mod::Inst& inst, std::unordered_map<std::string, size_t>& label_table) const; // :D
+            std::expected<void, SemErr> scout_lbl(instruction_mod::Inst& inst, std::unordered_map<std::string, size_t>& label_table); // :D
             std::expected<void, SemErr> validate_token(const instruction_mod::Token& token, const std::unordered_map<std::string, size_t>& label_table) const ; // :D
             std::expected<void, SemErr> validate_opcode(instruction_mod::Inst& inst, instruction_mod::OpCode opcode, const std::unordered_map<std::string, size_t>& label_table) const; // :D
-            std::expected<void, SemErr> analyze(instruction_mod::Inst& inst, const std::unordered_map<std::string, size_t>& label_table); // :D
+            std::expected<void, SemErr> analyze(instruction_mod::Inst& inst, const std::unordered_map<std::string, size_t>& label_table) const; // :D
             void RI_inst_classify(instruction_mod::Inst& inst) const; // !
 
     };

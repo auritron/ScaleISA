@@ -362,7 +362,7 @@ namespace parser_mod {
                 case State::Imm:
                     try {
                         size_t pos;
-                        int val = std::stoi(buffer.substr(1), &pos);
+                        int val = std::stoi(buffer.substr(1), &pos); //to be changed to from_chars()
                         if (pos != (buffer.size() - 1)) throw std::invalid_argument("Not completely int!");
                         switch (prev_state) {
                             case State::Reg: token = instruction_mod::Token(instruction_mod::TokenType::Register, val); break; //account for error handling

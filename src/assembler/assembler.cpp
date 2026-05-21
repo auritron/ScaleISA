@@ -72,6 +72,14 @@ void Assembler::dbg_display_tokens(const instruction_mod::Pipeline& pipeline) co
 
 }
 
+void Assembler::dbg_display_labels() const {
+    
+    for (const auto& [key, value] : label_table) {
+        std::cout << key << ": " << value << "\n";
+    }
+    
+}
+
 void Assembler::log_error(error::Err auto error) {
     error_log.emplace_back(error);
 }
