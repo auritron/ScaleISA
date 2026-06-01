@@ -32,7 +32,7 @@ namespace parser_mod {
         cur_inst(),
         cur_ch{0},
         line_count{1},
-        col_count{0},
+        col_count{1},
         tkn_start_char_col{0}
     { }
 
@@ -455,7 +455,7 @@ namespace parser_mod {
             }
             cur_inst = instruction_mod::Inst(); //reset current instruction
             ++line_count;
-            col_count = 0;
+            col_count = 1;
             cur_state = State::Nil;
             prev_state = State::Nil;
         } else {
