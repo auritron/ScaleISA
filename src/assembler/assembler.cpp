@@ -53,7 +53,7 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
         fs::path source_dir = fs::path(__FILE__).parent_path().parent_path().parent_path();
         std::string filename = std::string(assembler_mod::prog_name) + ".bin";
         fs::path filepath = source_dir / "progs" / filename;
-        std::cout << filepath << std::endl;
+        //std::cout << filepath << std::endl;
         std::ofstream output(filepath, std::ios::binary);
         codegen.write_magic(output, MAGIC_NUM);
         for (const auto& inst : pipeline) {
