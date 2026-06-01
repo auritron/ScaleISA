@@ -38,14 +38,19 @@ namespace error {
 
     class Error {
 
-        std::variant<ParsingError, SemanticError> error;
-
         public:
+
+            std::variant<ParsingError, SemanticError> error;
+            size_t err_line;
+            size_t err_col;
+
 
             Error() = delete;
 
-            Error(Err auto error) :
-                error{error}
+            Error(Err auto error, size_t err_ln, size_t err_cl) :
+                error{error},
+                err_line{err_ln},
+                err_col{err_cl}
             { }
 
             std::string_view fmt_error_as_str();

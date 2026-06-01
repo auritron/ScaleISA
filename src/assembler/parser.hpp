@@ -12,6 +12,7 @@
 
 namespace parser_mod { 
 
+    using error::Error;
     using ParseErr = error::ParsingError;
 
     enum class State {
@@ -64,10 +65,11 @@ namespace parser_mod {
         public:
             
             Parser();
-            std::expected<void, ParseErr> parse(instruction_mod::Pipeline& pipeline, char cur_char); //:D
-            std::expected<void, ParseErr> set_state(); //:D
-            std::expected<void, ParseErr> set_action(); //:D
-            std::expected<void, ParseErr> execute(instruction_mod::Pipeline& pipeline); //:D
+            std::expected<void, Error> parse(instruction_mod::Pipeline& pipeline, char cur_char); //:D
+            std::expected<void, Error> set_state(); //:D
+            std::expected<void, Error> set_action(); //:D
+            std::expected<void, Error> execute(instruction_mod::Pipeline& pipeline); //:D
+            std::unexpected<Error> parse_error(ParseErr err);
 
     };
 

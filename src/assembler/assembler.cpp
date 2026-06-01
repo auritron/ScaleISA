@@ -23,7 +23,7 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
     { auto parse_success = parser.parse(pipeline, '\n'); //add \n sentinel
         if (!parse_success) {
             if (!error_detected) error_detected = true; 
-            log_error(parse_success.error()); 
+            log_error(parse_success.error());
         }
     } 
 
@@ -62,6 +62,7 @@ void Assembler::assemble_prog(instruction_mod::Pipeline& pipeline, const std::st
         std::cout << "Code generation successfully completed.\n";
     } else {
         std::cout << "Errors detected. Code generation did not start.\n";
+        display_errors();
     }
 
 }
@@ -90,13 +91,23 @@ void Assembler::dbg_display_tokens(const instruction_mod::Pipeline& pipeline) co
 }
 
 void Assembler::dbg_display_labels() const {
-    
+
     for (const auto& [key, value] : label_table) {
         std::cout << key << ": " << value << "\n";
     }
 
 }
 
-void Assembler::log_error(error::Err auto error) {
-    error_log.emplace_back(error);
+void Assembler::log_error(error::Error& err) { //FIX THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    error_log.push_back(std::move(err));
+}
+
+void Assembler::display_errors() {
+    std::cout << "Errors found: \n";
+    for (auto& err : error_log) {
+        std::cout << 
+        "Line: " << err.err_line << 
+        ", Column: " << err.err_col <<
+        ": " << err.fmt_error_as_str() << "\n";
+    }
 }

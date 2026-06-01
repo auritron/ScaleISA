@@ -36,7 +36,7 @@ namespace parser_mod {
         tkn_start_char_col{0}
     { }
 
-    std::expected<void, ParseErr> Parser::set_state() {
+    std::expected<void, Error> Parser::set_state() {
 
 
         if (cur_ch == ';') {
@@ -61,13 +61,13 @@ namespace parser_mod {
                     break;
                 case State::Imt:
                 case State::Zer:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Lbt:
-                    return std::unexpected(ParseErr::LabelNamingError);
+                    return parse_error(ParseErr::LabelNamingError);
                     break;
                 case State::Adt:
-                    return std::unexpected(ParseErr::AddressNamingError);
+                    return parse_error(ParseErr::AddressNamingError);
                     break;
                 case State::Err:
                     break;
@@ -88,18 +88,18 @@ namespace parser_mod {
                     break;
                 case State::Adt:
                 case State::Adr:
-                    return std::unexpected(ParseErr::AddressNamingError);
+                    return parse_error(ParseErr::AddressNamingError);
                     break;
                 case State::Imt:
                 case State::Imm:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Lbt:
                 case State::Lbl:
                     cur_state = State::Lbl;
                     break;
                 case State::Zer:
-                    return std::unexpected(ParseErr::IdentifierNamingError);
+                    return parse_error(ParseErr::IdentifierNamingError);
                     break;
                 case State::Err:
                     break;
@@ -116,19 +116,19 @@ namespace parser_mod {
                 case State::Rgt:
                 case State::Reg:
                 case State::Zer:
-                    return std::unexpected(ParseErr::IdentifierNamingError);
+                    return parse_error(ParseErr::IdentifierNamingError);
                     break;
                 case State::Imt:
                 case State::Imm:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Lbl:
                 case State::Lbt:
-                    return std::unexpected(ParseErr::LabelNamingError);
+                    return parse_error(ParseErr::LabelNamingError);
                     break;
                 case State::Adt:
                 case State::Adr:
-                    return std::unexpected(ParseErr::AddressNamingError);
+                    return parse_error(ParseErr::AddressNamingError);
                     break;
                 case State::Nil:
                     cur_state = State::Lbt;
@@ -146,19 +146,19 @@ namespace parser_mod {
                 case State::Rgt:
                 case State::Reg:
                 case State::Zer:
-                    return std::unexpected(ParseErr::IdentifierNamingError);
+                    return parse_error(ParseErr::IdentifierNamingError);
                     break;
                 case State::Imt:
                 case State::Imm:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Lbl:
                 case State::Lbt:
-                    return std::unexpected(ParseErr::LabelNamingError);
+                    return parse_error(ParseErr::LabelNamingError);
                     break;
                 case State::Adt:
                 case State::Adr:
-                    return std::unexpected(ParseErr::AddressNamingError);
+                    return parse_error(ParseErr::AddressNamingError);
                     break;
                 case State::Nil:
                     cur_state = State::Imt;
@@ -179,11 +179,11 @@ namespace parser_mod {
                     cur_state = State::Idn;
                     break;
                 case State::Zer:
-                    return std::unexpected(ParseErr::IdentifierNamingError);
+                    return parse_error(ParseErr::IdentifierNamingError);
                     break;
                 case State::Imt:
                 case State::Imm:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Lbl:
                 case State::Lbt:
@@ -191,7 +191,7 @@ namespace parser_mod {
                     break;
                 case State::Adt:
                 case State::Adr:
-                    return std::unexpected(ParseErr::AddressNamingError);
+                    return parse_error(ParseErr::AddressNamingError);
                     break;
                 case State::Err:
                     break;
@@ -213,7 +213,7 @@ namespace parser_mod {
                     if (cur_ch == '0') { //if its zero, set to zer to transition to address, else raise error
                         cur_state = State::Zer;
                     } else {
-                        return std::unexpected(ParseErr::IdentifierNamingError);
+                        return parse_error(ParseErr::IdentifierNamingError);
                     }
                     break;
                 case State::Imt:
@@ -225,7 +225,7 @@ namespace parser_mod {
                     cur_state = State::Lbl;
                     break;
                 case State::Zer:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Adt:
                 case State::Adr:
@@ -248,21 +248,21 @@ namespace parser_mod {
                     break;
                 case State::Imm:
                 case State::Imt:
-                    return std::unexpected(ParseErr::ImmediateValueError);
+                    return parse_error(ParseErr::ImmediateValueError);
                     break;
                 case State::Lbt:
                 case State::Lbl:
                     cur_state = State::Lbl;
                     break;
                 case State::Zer:
-                    return std::unexpected(ParseErr::IdentifierNamingError);
+                    return parse_error(ParseErr::IdentifierNamingError);
                     break;
                 case State::Adt:
                 case State::Adr:
                     if ((cur_ch >= 'A' && cur_ch <= 'F') || (cur_ch >= 'a' && cur_ch <= 'f')) { //if between A-F or a-f
                         cur_state = State::Adr;
                     } else {
-                        return std::unexpected(ParseErr::AddressNamingError);
+                        return parse_error(ParseErr::AddressNamingError);
                     }
                     break;
                 case State::Err:
@@ -275,7 +275,7 @@ namespace parser_mod {
         } else {
 
             cur_state = State::Err;
-            return std::unexpected(ParseErr::UnknownCharError);
+            return parse_error(ParseErr::UnknownCharError);
 
         }
 
@@ -283,7 +283,7 @@ namespace parser_mod {
 
     }
 
-    std::expected<void, ParseErr> Parser::set_action() {
+    std::expected<void, Error> Parser::set_action() {
 
         switch ( state_map.at(prev_state) ) {
 
@@ -340,7 +340,7 @@ namespace parser_mod {
 
     }
 
-    std::expected<void, ParseErr> Parser::execute(instruction_mod::Pipeline& pipeline) {
+    std::expected<void, Error> Parser::execute(instruction_mod::Pipeline& pipeline) {
             
         instruction_mod::Token token;
         switch (cur_action) {
@@ -375,8 +375,8 @@ namespace parser_mod {
                             token = instruction_mod::Token(instruction_mod::TokenType::Invalid, 0, line_count, tkn_start_char_col);
                         } else if (errc == std::errc::result_out_of_range) { //value is too big to parse
                             switch (prev_state) {
-                                case State::Reg: return std::unexpected(ParseErr::RegisterOutOfRange); break;
-                                case State::Imm: return std::unexpected(ParseErr::ImmediateValueTooBig); break;
+                                case State::Reg: return parse_error(ParseErr::RegisterOutOfRange); break;
+                                case State::Imm: return parse_error(ParseErr::ImmediateValueTooBig); break;
                             }
                         } else { //success
                             switch (prev_state) {
@@ -401,7 +401,7 @@ namespace parser_mod {
                         if (errc == std::errc::invalid_argument || ptr != end_char) { //shouldn't happen ideally
                             token = instruction_mod::Token(instruction_mod::TokenType::Invalid, 0, line_count, tkn_start_char_col);
                         } else if (errc == std::errc::result_out_of_range) { //too big to parse
-                            return std::unexpected(ParseErr::AddressOutOfRange);
+                            return parse_error(ParseErr::AddressOutOfRange);
                         } else { //success
                             token = instruction_mod::Token(instruction_mod::TokenType::Address, val, line_count, tkn_start_char_col);
                         }
@@ -419,7 +419,7 @@ namespace parser_mod {
                     }
             }
             
-            if (!cur_inst.push_token(std::move(token))) return std::unexpected(ParseErr::InstructionTooLong); //move happens here 
+            if (!cur_inst.push_token(std::move(token))) return parse_error(ParseErr::InstructionTooLong); //move happens here 
             buffer.clear();
             break;
 
@@ -432,10 +432,10 @@ namespace parser_mod {
 
     }
 
-    std::expected<void, ParseErr> Parser::parse(instruction_mod::Pipeline& pipeline, char current_char) {
+    std::expected<void, Error> Parser::parse(instruction_mod::Pipeline& pipeline, char current_char) {
 
         cur_ch = current_char;
-        std::optional<ParseErr> pending_error = std::nullopt;
+        std::optional<Error> pending_error = std::nullopt;
 
         if (cur_state != State::Err && cur_state != State::Cmt) {
             auto result = set_state()
@@ -467,6 +467,11 @@ namespace parser_mod {
         if (pending_error) return std::unexpected(*pending_error);
 
         return {};
+    }
+
+    //helper
+    std::unexpected<Error> Parser::parse_error(ParseErr err) {
+        return std::unexpected<Error>(Error(err, line_count, col_count));
     }
 
 }

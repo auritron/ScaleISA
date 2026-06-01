@@ -34,7 +34,8 @@ namespace assembler_mod {
             void assemble_prog(instruction_mod::Pipeline& pipeline, const std::string& file);
             void dbg_display_tokens(const instruction_mod::Pipeline& pipeline) const;
             void dbg_display_labels() const;
-            void log_error(error::Err auto error);
+            void log_error(error::Error& err);
+            void display_errors();
 
     };
 
